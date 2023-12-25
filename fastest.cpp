@@ -5,11 +5,9 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <sys/ioctl.h>
 #include <unistd.h>
-#include <linux/fb.h>
 #include <linux/kd.h>
-#include <fcntl.h>
+#include "framebuffer_info.h"
 
 //模型的参数配置
 yoloFastestv2::yoloFastestv2()
@@ -229,32 +227,6 @@ int yoloFastestv2::detection(const cv::Mat srcImg, std::vector<TargetBox> &dstBo
     return 0;
 }
 
-struct framebuffer_info
-{
-    uint32_t bits_per_pixel;    // framebuffer depth
-    uint32_t xres_virtual;      // how many pixel in a row in virtual screen
-      uint32_t xres;
-};
-
-struct framebuffer_info get_framebuffer_info(const char *framebuffer_device_path)
-{
-    struct framebuffer_info fb_info;        // Used to return the required attrs.
-    struct fb_var_screeninfo screen_info;   // Used to get attributes of the device from OS kernel.
-
-	int fd = open(framebuffer_device_path, O_RDWR);
-
-	if(ioctl(fd,FBIOGET_VSCREENINFO,&screen_info)<0)
-	{
-		printf("ioctl fail\n");	
-	}
-	fb_info.xres_virtual=screen_info.xres_virtual;
-	fb_info.bits_per_pixel=screen_info.bits_per_pixel;
-	fb_info.xres=screen_info.xres;
-
-
-    return fb_info;
-};
-
 int main()
 {   
     static const char* class_names[] = {
@@ -270,11 +242,8 @@ int main()
     };
     
     yoloFastestv2 api;
-
-
     api.loadModel("./model/yolo-fastestv2-opt.param",
                   "./model/yolo-fastestv2-opt.bin");
-
     cv::VideoCapture camera_stream(2);
     cv::VideoWriter videoWriter;
     int frame_width = camera_stream.get(cv::CAP_PROP_FRAME_WIDTH);
@@ -294,43 +263,43 @@ int main()
     cv::Size2f image_size;
 
     while(1)
-      {
-	auto start = std::chrono::high_resolution_clock::now();
+    {
+        auto start = std::chrono::high_resolution_clock::now();
 
-	camera_stream >> cvImg;
-	std::vector<TargetBox> boxes;
-	api.detection(cvImg, boxes);
+        camera_stream >> cvImg;
+        std::vector<TargetBox> boxes;
+        api.detection(cvImg, boxes);
 
-	for (int i = 0; i < boxes.size(); i++) {
-	  if (class_names[boxes[i].cate] == std::string("mouse") || 
-                class_names[boxes[i].cate] == std::string("keyboard") || 
-                class_names[boxes[i].cate] == std::string("tv")) {
-	    std::cout<<boxes[i].x1<<" "<<boxes[i].y1<<" "<<boxes[i].x2<<" "<<boxes[i].y2
-		     <<" "<<boxes[i].score<<" "<<boxes[i].cate<<std::endl;
-        
-	    char text[256];
-	    // sprintf(text, "%s %.1f%%", class_names[boxes[i].cate], boxes[i].score * 100);
+        for (int i = 0; i < boxes.size(); i++) {
+        if (class_names[boxes[i].cate] == std::string("mouse") || 
+                    class_names[boxes[i].cate] == std::string("keyboard") || 
+                    class_names[boxes[i].cate] == std::string("tv")) {
+            std::cout<<boxes[i].x1<<" "<<boxes[i].y1<<" "<<boxes[i].x2<<" "<<boxes[i].y2
+                <<" "<<boxes[i].score<<" "<<boxes[i].cate<<std::endl;
+            
+            char text[256];
+            // sprintf(text, "%s %.1f%%", class_names[boxes[i].cate], boxes[i].score * 100);
 
-	    int baseLine = 0;
-	    cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+            int baseLine = 0;
+            cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
 
-	    int x = boxes[i].x1;
-	    int y = boxes[i].y1 - label_size.height - baseLine;
-	    if (y < 0)
-	      y = 0;
-	    if (x + label_size.width > cvImg.cols)
-	      x = cvImg.cols - label_size.width;
+            int x = boxes[i].x1;
+            int y = boxes[i].y1 - label_size.height - baseLine;
+            if (y < 0)
+            y = 0;
+            if (x + label_size.width > cvImg.cols)
+            x = cvImg.cols - label_size.width;
 
-	    cv::rectangle(cvImg, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-			  cv::Scalar(255, 255, 255), -1);
+            cv::rectangle(cvImg, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
+                cv::Scalar(255, 255, 255), -1);
 
-	    cv::putText(cvImg, text, cv::Point(x, y + label_size.height),
-			cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+            cv::putText(cvImg, text, cv::Point(x, y + label_size.height),
+                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
 
-	    cv::rectangle (cvImg, cv::Point(boxes[i].x1, boxes[i].y1), 
-			   cv::Point(boxes[i].x2, boxes[i].y2), cv::Scalar(255, 255, 0), 2, 2, 0);
-	  }
-	}
+            cv::rectangle (cvImg, cv::Point(boxes[i].x1, boxes[i].y1), 
+                cv::Point(boxes[i].x2, boxes[i].y2), cv::Scalar(255, 255, 0), 2, 2, 0);
+        }
+        }
 	/*
 	cv::cvtColor(cvImg,cvImg,cv::COLOR_BGR2BGR565);
 	image_size=cvImg.size();
@@ -341,14 +310,13 @@ int main()
 	    ofs.write(reinterpret_cast<char*>(cvImg.ptr(y)),image_size.width*(fb_info.bits_per_pixel/8));
 	  }
 	*/
-	videoWriter.write(cvImg);
-	auto end = std::chrono::high_resolution_clock::now();
+        videoWriter.write(cvImg);
+        auto end = std::chrono::high_resolution_clock::now();
 
-	std::cout << "frame processed in : ";
-	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	std::cout << "ms" << std::endl;
+        std::cout << "frame processed in : ";
+        std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "ms" << std::endl;
       }
-
     return 0;
 }
 
