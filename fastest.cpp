@@ -255,7 +255,7 @@ int main()
 	printf("camera pas ouverte\n");
 	return -1;
     }
-    camera_stream.set(cv::CAP_PROP_FPS, 5);
+    camera_stream.set(cv::CAP_PROP_FPS, 1);
     framebuffer_info fb_info = get_framebuffer_info("/dev/fb0");
     std::ofstream ofs("/dev/fb0");
 
