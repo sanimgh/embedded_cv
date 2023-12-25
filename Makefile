@@ -10,7 +10,7 @@ CXXFLAGS := -I /home/user/ncnn/build-arm-linux-gnueabihf/install/include/ncnn \
             -Wl,-rpath-link=/opt/EmbedSky/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/qt5.5/rootfs_imx6q_V3_qt5.5_env/qt5.5_env/lib/ \
             -Wl,-rpath-link=/opt/EmbedSky/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/qt5.5/rootfs_imx6q_V3_qt5.5_env/usr/lib/ \
             -lpthread -lopencv_world -lncnn -std=c++11 -O3
-TARGETS := yolox fastest yolov7
+TARGETS := yolox fastest yolov7 yoloXnano yolov4
 SRCS := $(addsuffix .cpp, $(TARGETS))
 OBJS := $(SRCS:.cpp=.o)
 
