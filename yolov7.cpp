@@ -461,7 +461,7 @@ int main(int argc, char** argv)
 
     draw_objects(m, objects);
    auto  end = std::chrono::high_resolution_clock::now();
-    std::cout << "post processing : ";
+    std::cout << "frame: ";
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "ms" << std::endl;
 
