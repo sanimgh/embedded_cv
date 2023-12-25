@@ -11,6 +11,6 @@ Embedded Computer Vision using Tencent NCNN running on EmbedSky E9v3
 
 
 Using:
- https://github.com/Tencent/ncnn
- https://github.com/dog-qiuqiu/Yolo-FastestV2
- https://github.com/Qengineering/YoloX-ncnn-Jetson-Nano
+ https://github.com/Tencent/ncnn <br>
+ https://github.com/dog-qiuqiu/Yolo-FastestV2 <br>
+ https://github.com/Qengineering/YoloX-ncnn-Jetson-Nano <br>
