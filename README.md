@@ -1,6 +1,5 @@
 # embedded_cv
-embedded cv using ncnn
-
+Embedded Computer Vision using Tencent NCNN running on EmbedSky E9v3 
 
 |   Model   |   Inference Time |   Result |
 |---    |:-:    |:-:    |
