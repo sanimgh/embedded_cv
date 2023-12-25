@@ -435,7 +435,7 @@ static void draw_objects(const cv::Mat& bgr, const std::vector<Object>& objects)
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255));
     }
 
- cv::imwrite("result-detection-yolov7-tiny.png", image);
+ cv::imwrite("/run/media/mmcblk1p1/screenshot/result-detection-yolov7-tiny.png", image);
 }
 
 int main(int argc, char** argv)

@@ -398,7 +398,7 @@ static void draw_objects(const cv::Mat& bgr, const std::vector<Object>& objects)
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
     }
 
-          cv::imwrite("result-detection-yolox.png", image);
+          cv::imwrite("/run/media/mmcblk1p1/screenshot/result-detection-yolox.png", image);
 }
 
 int main(int argc, char** argv)
