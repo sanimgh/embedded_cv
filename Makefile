@@ -20,7 +20,7 @@ all: $(TARGETS)
 
 # Règle de compilation
 $(TARGETS):
-	$(CXX) $@.cpp -o $@ $(CXXFLAGS)
+	$(CXX) $@.cpp framebuffer_info.cpp -o $@ $(CXXFLAGS)
 
 # Règle de nettoyage
 clean:
