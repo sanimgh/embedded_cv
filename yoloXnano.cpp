@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <vector>
 #include <unistd.h>
-
+#include <iostream>
 
 // Jetson Nano overclocked to 2014 MHz
 // YoloX Nano  | size=416 | model=yoloxN.* | 17.61 FPS | 25.8 mAP
