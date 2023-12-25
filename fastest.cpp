@@ -248,7 +248,7 @@ int main()
     cv::VideoWriter videoWriter;
     int frame_width = camera_stream.get(cv::CAP_PROP_FRAME_WIDTH);
     int frame_height = camera_stream.get(cv::CAP_PROP_FRAME_HEIGHT);
-    videoWriter.open("/run/media/mmcblk1p1/screenshot/video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frame_width, frame_height));
+    videoWriter.open("/run/media/mmcblk1p1/screenshot/video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 1, cv::Size(frame_width, frame_height));
 
     if(!camera_stream.isOpened())
     {
@@ -278,7 +278,7 @@ int main()
                 <<" "<<boxes[i].score<<" "<<boxes[i].cate<<std::endl;
             
             char text[256];
-            // sprintf(text, "%s %.1f%%", class_names[boxes[i].cate], boxes[i].score * 100);
+            sprintf(text, "%s %.1f%%", class_names[boxes[i].cate], boxes[i].score * 100);
 
             int baseLine = 0;
             cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
