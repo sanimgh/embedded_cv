@@ -22,7 +22,7 @@ yoloFastestv2::yoloFastestv2()
     //类别数目
     numCategory = 80;
     //NMS阈值
-    nmsThresh = 0.20;
+    nmsThresh = 0.30;
 
     //模型输入尺寸大小
     inputWidth = 416;
