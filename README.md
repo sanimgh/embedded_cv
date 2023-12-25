@@ -9,4 +9,7 @@ Embedded Computer Vision using Tencent NCNN running on EmbedSky E9v3
 |   YoloX   |   11655 ms  |   ![image](images/result-detection-yolox.png) |
 |   YoloXnano   |   1272 ms  |   ![image](images/result-detection-yoloXnano.png) |  
 
- 
+
+Using:
+ https://github.com/Tencent/ncnn
+ https://github.com/dog-qiuqiu/Yolo-FastestV2
