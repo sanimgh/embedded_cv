@@ -274,8 +274,7 @@ int main()
         if (class_names[boxes[i].cate] == std::string("mouse") || 
                     class_names[boxes[i].cate] == std::string("keyboard") || 
                     class_names[boxes[i].cate] == std::string("tv")) {
-            std::cout<<boxes[i].x1<<" "<<boxes[i].y1<<" "<<boxes[i].x2<<" "<<boxes[i].y2
-                <<" "<<boxes[i].score<<" "<<boxes[i].cate<<std::endl;
+            //std::cout<<boxes[i].x1<<" "<<boxes[i].y1<<" "<<boxes[i].x2<<" "<<boxes[i].y2<<" "<<boxes[i].score<<" "<<boxes[i].cate<<std::endl;
             
             char text[256];
             sprintf(text, "%s %.1f%%", class_names[boxes[i].cate], boxes[i].score * 100);
