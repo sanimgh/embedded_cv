@@ -22,11 +22,11 @@ yoloFastestv2::yoloFastestv2()
     //类别数目
     numCategory = 80;
     //NMS阈值
-    nmsThresh = 0.25;
+    nmsThresh = 0.20;
 
     //模型输入尺寸大小
-    inputWidth = 352;
-    inputHeight = 352;
+    inputWidth = 416;
+    inputHeight = 416;
 
     //模型输入输出节点名称
     inputName = "input.1";
@@ -248,14 +248,14 @@ int main()
     cv::VideoWriter videoWriter;
     int frame_width = camera_stream.get(cv::CAP_PROP_FRAME_WIDTH);
     int frame_height = camera_stream.get(cv::CAP_PROP_FRAME_HEIGHT);
-    videoWriter.open("/run/media/mmcblk1p1/screenshot/video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 1, cv::Size(frame_width, frame_height));
+    videoWriter.open("/run/media/mmcblk1p1/screenshot/video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 2, cv::Size(frame_width, frame_height));
 
     if(!camera_stream.isOpened())
     {
 	printf("camera pas ouverte\n");
 	return -1;
     }
-    camera_stream.set(cv::CAP_PROP_FPS, 1);
+    camera_stream.set(cv::CAP_PROP_FPS, 2);
     framebuffer_info fb_info = get_framebuffer_info("/dev/fb0");
     std::ofstream ofs("/dev/fb0");
 
