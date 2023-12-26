@@ -245,11 +245,6 @@ int main()
     api.loadModel("./model/yolo-fastestv2-opt.param",
                   "./model/yolo-fastestv2-opt.bin");
     cv::VideoCapture camera_stream(2);
-    cv::VideoWriter videoWriter;
-    int frame_width = camera_stream.get(cv::CAP_PROP_FRAME_WIDTH);
-    int frame_height = camera_stream.get(cv::CAP_PROP_FRAME_HEIGHT);
-    videoWriter.open("/run/media/mmcblk1p1/screenshot/video.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 2, cv::Size(frame_width, frame_height));
-
     if(!camera_stream.isOpened())
     {
 	printf("camera pas ouverte\n");
@@ -258,7 +253,6 @@ int main()
     camera_stream.set(cv::CAP_PROP_FPS, 2);
     framebuffer_info fb_info = get_framebuffer_info("/dev/fb0");
     std::ofstream ofs("/dev/fb0");
-
     cv::Mat cvImg;
     cv::Size2f image_size;
 
@@ -299,19 +293,16 @@ int main()
                 cv::Point(boxes[i].x2, boxes[i].y2), cv::Scalar(255, 255, 0), 2, 2, 0);
         }
         }
-	/*
-	cv::cvtColor(cvImg,cvImg,cv::COLOR_BGR2BGR565);
-	image_size=cvImg.size();
-	int x_offset =(fb_info.xres_virtual-image_size.width)/2;
-	for (int y = 0; y < image_size.height; y++)
-	  {
-	    ofs.seekp(y * (fb_info.xres_virtual * fb_info.bits_per_pixel / 8)+ (x_offset*fb_info.bits_per_pixel/8));	
-	    ofs.write(reinterpret_cast<char*>(cvImg.ptr(y)),image_size.width*(fb_info.bits_per_pixel/8));
-	  }
-	*/
-        videoWriter.write(cvImg);
+        
+        cv::cvtColor(cvImg,cvImg,cv::COLOR_BGR2BGR565);
+        image_size=cvImg.size();
+        int x_offset =(fb_info.xres_virtual-image_size.width)/2;
+        for (int y = 0; y < image_size.height; y++)
+        {
+            ofs.seekp(y * (fb_info.xres_virtual * fb_info.bits_per_pixel / 8)+ (x_offset*fb_info.bits_per_pixel/8));	
+            ofs.write(reinterpret_cast<char*>(cvImg.ptr(y)),image_size.width*(fb_info.bits_per_pixel/8));
+        }
         auto end = std::chrono::high_resolution_clock::now();
-
         std::cout << "frame processed in : ";
         std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         std::cout << "ms" << std::endl;
