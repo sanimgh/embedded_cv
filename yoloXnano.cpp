@@ -26,6 +26,8 @@
 #include <vector>
 #include <unistd.h>
 #include <iostream>
+#include "framebuffer_info.h"
+
 
 // Jetson Nano overclocked to 2014 MHz
 // YoloX Nano  | size=416 | model=yoloxN.* | 17.61 FPS | 25.8 mAP
@@ -352,47 +354,35 @@ static void draw_objects(cv::Mat& bgr, const std::vector<Object>& objects)
 //        fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
 //                obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
 
-        cv::rectangle(bgr, obj.rect, cv::Scalar(255, 0, 0));
+        std::string label = class_names[obj.label];
+        if (label == "keyboard" || label == "mouse" || label == "tv")
+        {
+            cv::rectangle(bgr, obj.rect, cv::Scalar(255, 0, 0));
 
-        char text[256];
-        sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
+            char text[256];
+            sprintf(text, "%s %.1f%%", class_names[obj.label], obj.prob * 100);
 
-        int baseLine = 0;
-        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+            int baseLine = 0;
+            cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
 
-        int x = obj.rect.x;
-        int y = obj.rect.y - label_size.height - baseLine;
-        if (y < 0)
-            y = 0;
-        if (x + label_size.width > bgr.cols)
-            x = bgr.cols - label_size.width;
+            int x = obj.rect.x;
+            int y = obj.rect.y - label_size.height - baseLine;
+            if (y < 0)
+                y = 0;
+            if (x + label_size.width > bgr.cols)
+                x = bgr.cols - label_size.width;
 
-        cv::rectangle(bgr, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
-                      cv::Scalar(255, 255, 255), -1);
+            cv::rectangle(bgr, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)),
+                        cv::Scalar(255, 255, 255), -1);
 
-        cv::putText(bgr, text, cv::Point(x, y + label_size.height),
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+            cv::putText(bgr, text, cv::Point(x, y + label_size.height),
+                        cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+        }
     }
 }
 
 int main(int argc, char** argv)
 {
-std::chrono::steady_clock::time_point Tbegin, Tend;
-
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: %s [imagepath]\n", argv[0]);
-        return -1;
-    }
-
-    const char* imagepath = argv[1];
-
-    cv::Mat m = cv::imread(imagepath, 1);
-    if (m.empty())
-    {
-        fprintf(stderr, "cv::imread %s failed\n", imagepath);
-        return -1;
-    }
 
     yolox.opt.use_vulkan_compute = true;
 
@@ -403,15 +393,46 @@ std::chrono::steady_clock::time_point Tbegin, Tend;
     yolox.load_param("models/yoloxN.param");
     yolox.load_model("models/yoloxN.bin");
 
-    auto start = std::chrono::high_resolution_clock::now();
-    std::vector<Object> objects;
-    detect_yolox(m, objects);
-    draw_objects(m, objects);
-    auto  end = std::chrono::high_resolution_clock::now();
-    std::cout << "post processing : ";
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "ms" << std::endl;
-    cv::imwrite("/run/media/mmcblk1p1/screenshot/result-detection-yoloXnano.png", m);
+    cv::VideoCapture camera_stream(2);
+    if(!camera_stream.isOpened())
+    {
+	printf("camera pas ouverte\n");
+	return -1;
+    }
+    camera_stream.set(cv::CAP_PROP_FPS, 1);
+    framebuffer_info fb_info = get_framebuffer_info("/dev/fb0");
+    std::ofstream ofs("/dev/fb0");
+
+    cv::Mat m;
+    cv::Size2f image_size;
+
+    framebuffer_info fb_info = get_framebuffer_info("/dev/fb0");
+    std::ofstream ofs("/dev/fb0");
+
+    while(1)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        camera_stream >> m;
+        std::vector<Object> objects;
+        detect_yolox(m, objects);
+        draw_objects(m, objects);
+
+        cv::cvtColor(m,m,cv::COLOR_BGR2BGR565);
+        image_size=m.size();
+        int x_offset =(fb_info.xres_virtual-image_size.width)/2;
+        for (int y = 0; y < image_size.height; y++)
+        {
+            ofs.seekp(y * (fb_info.xres_virtual * fb_info.bits_per_pixel / 8)+ (x_offset*fb_info.bits_per_pixel/8));	
+            ofs.write(reinterpret_cast<char*>(m.ptr(y)),image_size.width*(fb_info.bits_per_pixel/8));
+        }
+        auto  end = std::chrono::high_resolution_clock::now();
+        std::cout << "frame processed in : ";
+        std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "ms" << std::endl;
+
+    }
+
+
     
 
 
